@@ -19,7 +19,7 @@ import java.util.Vector;
 
 import static com.example.deltatask3.CrimeListLocation.IDD;
 
-public class FavouriteActivity extends AppCompatActivity implements CrimeLocationAdapter.OnCrimeListInterface, CrimeLocationAdapter.OnFavouriteInterface{
+public class FavouriteActivity extends AppCompatActivity implements CrimeLocationAdapter.OnCrimeListInterface{
 
 
     List<String> FavPID = new Vector<String>();
@@ -64,7 +64,7 @@ public class FavouriteActivity extends AppCompatActivity implements CrimeLocatio
 
         if(FavPID.size()>0)
         {
-            CR = new CrimeLocationAdapter(getApplicationContext(),this,this,FavPID,FavCat,FavLat,FavLong,20,STARC);
+            CR = new CrimeLocationAdapter(getApplicationContext(),this,FavPID,FavCat,FavLat,FavLong,STARC);
         }
 
         heyshona.setHasFixedSize(true);
@@ -137,8 +137,5 @@ public class FavouriteActivity extends AppCompatActivity implements CrimeLocatio
         startActivity(intint);
     }
 
-    @Override
-    public void onFavouriteAdded(String MyPers, String MyCateg, String MyLAT, String MyLong, int flagpoint) {
-        System.out.println("Hey, you just got fooled. HAHA.");
-    }
+
 }

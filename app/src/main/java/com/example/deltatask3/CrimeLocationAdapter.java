@@ -6,11 +6,14 @@ import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.Layout;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,7 +42,6 @@ public class CrimeLocationAdapter extends RecyclerView.Adapter<CrimeLocationAdap
 
 
     OnCrimeListInterface mOnCrimeListInterface;
-    OnFavouriteInterface mOnFavouriteInterface;
 
     List<String> SAVED = new Vector<String>();
 
@@ -49,7 +51,8 @@ public class CrimeLocationAdapter extends RecyclerView.Adapter<CrimeLocationAdap
 
     Context context;
 
-    public CrimeLocationAdapter(Context con, OnFavouriteInterface onFavouriteInterface, OnCrimeListInterface onCrimeListInterface, List<String> persis2, List<String> categ2,List<String> LAT3, List<String> LONG4, List<Integer> p, List<String> LatSaved)
+
+    public CrimeLocationAdapter(Context con, OnCrimeListInterface onCrimeListInterface, List<String> persis2, List<String> categ2,List<String> LAT3, List<String> LONG4, List<Integer> p, List<String> LatSaved)
     {
         foryellowcolr=1;
         persis=persis2;
@@ -61,29 +64,25 @@ public class CrimeLocationAdapter extends RecyclerView.Adapter<CrimeLocationAdap
         STAR=p;
 
         this.mOnCrimeListInterface=onCrimeListInterface;
-        this.mOnFavouriteInterface=onFavouriteInterface;
 
         SAVED = LatSaved;
 
         System.out.println("SIZE IS : "+FINALLAT.size());
     }
 
-    public CrimeLocationAdapter(Context con, OnFavouriteInterface onFavouriteInterface, OnCrimeListInterface onCrimeListInterface, List<String> persis2, List<String> categ2,List<String> LAT3, List<String> LONG4, int lmn, List<Integer> p)
+    public CrimeLocationAdapter(Context con, OnCrimeListInterface onCrimeListInterface, List<String> persis2, List<String> categ2,List<String> LAT3, List<String> LONG4, List<Integer> p)
     {
         persis=persis2;
         categ=categ2;                                       //overload
         FINALLAT=LAT3;
         FINALLONG=LONG4;
-        foryellowcolr=lmn;
         context=con;
 
 
         STAR = p;
 
         this.mOnCrimeListInterface=onCrimeListInterface;
-        this.mOnFavouriteInterface=onFavouriteInterface;
 
-        foryellowcolr=lmn;
 
         System.out.println("SIZE IS : "+FINALLAT.size());
     }
@@ -96,7 +95,7 @@ public class CrimeLocationAdapter extends RecyclerView.Adapter<CrimeLocationAdap
         LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
         View view = inflater.inflate(R.layout.crime_theme,viewGroup,false);
 
-        return new CrimeHolder(view,mOnCrimeListInterface,mOnFavouriteInterface);
+        return new CrimeHolder(view,mOnCrimeListInterface);
     }
 
     @Override
@@ -132,17 +131,16 @@ public class CrimeLocationAdapter extends RecyclerView.Adapter<CrimeLocationAdap
         return FINALLAT.size();
     }
 
-    public class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         TextView persistent,FINALLATT,FINALLONGG,category;
         OnCrimeListInterface onCrimeListInterface;
-        OnFavouriteInterface onFavouriteInterface;
         TextView FurtherDetails;
         TextView illbethereforyou;
         ImageView star;
 
 
-        public CrimeHolder(@NonNull View itemView, OnCrimeListInterface onCrimeListInterface, OnFavouriteInterface onFavouriteInterface) {
+        public CrimeHolder(@NonNull View itemView, OnCrimeListInterface onCrimeListInterface) {
             super(itemView);
 
             star=(ImageView) itemView.findViewById(R.id.star);
@@ -153,80 +151,54 @@ public class CrimeLocationAdapter extends RecyclerView.Adapter<CrimeLocationAdap
             FurtherDetails=(TextView)itemView.findViewById(R.id.FurtherDetails);
             illbethereforyou=(TextView)itemView.findViewById(R.id.iwillbethereforyou);
 
-            if(foryellowcolr==20)
-            {
-                star.setBackgroundResource(R.drawable.star_yellow);
-            }
-
             this.onCrimeListInterface=onCrimeListInterface;
-            this.onFavouriteInterface=onFavouriteInterface;
 
             FurtherDetails.setOnClickListener(this);
-            star.setOnClickListener(this);
+            itemView.setOnTouchListener(new OnSwipeTouchListener(context){
+                @Override
+                public void onSwipeLeft() {
+
+                    //del from fav
+
+                    CrimeListLocation.secondfavwordstartingwithf.DeleteByLat(FINALLAT.get(getAdapterPosition()));
+                    STAR.set(getAdapterPosition(),R.drawable.star_white);
+
+                    List<String> list2 = new ArrayList<String>();
+
+                    Cursor res = CrimeListLocation.secondfavwordstartingwithf.getFavCrimes();
+
+                    while(res.moveToNext())
+                    {
+                        list2.add(res.getString(2));
+                    }
+
+                    SAVED=list2;
+
+                    notifyItemChanged(getAdapterPosition());
+                }
+
+                @Override
+                public void onSwipeRight(){
+
+                    //add to fav
+
+                    CrimeListLocation.secondfavwordstartingwithf.InsertData(persis.get(getAdapterPosition()),categ.get(getAdapterPosition()),FINALLAT.get(getAdapterPosition()),FINALLONG.get(getAdapterPosition()));
+                    STAR.set(getAdapterPosition(),R.drawable.star_yellow);
+
+                    notifyItemChanged(getAdapterPosition());
+                }
+            });
         }
 
         @Override
         public void onClick(View v) {
             if(v.getId() == FurtherDetails.getId())
                 onCrimeListInterface.onCrimeListClick(persis.get(getAdapterPosition()));
-            else if(v.getId() == star.getId())
-            {
-                if(STAR.get(getAdapterPosition())==R.drawable.star_white)
-                {
-                    flagpoint=50;
-                    STAR.set(getAdapterPosition(),R.drawable.star_yellow);
-                }
-
-                else if(STAR.get(getAdapterPosition())==R.drawable.star_yellow && !(foryellowcolr==20))
-                {
-                    flagpoint=100;
-                    STAR.set(getAdapterPosition(),R.drawable.star_white);
-                }
-                /*for(int i=0; i<FINALLAT.size();i++)
-                {
-                    STAR.set(i,R.drawable.star_white);
-                }
-
-                for(int i=0; i<FINALLAT.size(); i++)
-                {
-                    for(int j=0; j<SAVED.size(); )
-                }
-                */
-                notifyItemChanged(getAdapterPosition());
-                // bookmarked(FINALLAT.get(getAdapterPosition()));
-                onFavouriteInterface.onFavouriteAdded(persis.get(getAdapterPosition()),categ.get(getAdapterPosition()),FINALLAT.get(getAdapterPosition()),FINALLONG.get(getAdapterPosition()),flagpoint);
-
-                List<String> list2 = new ArrayList<String>();
-
-                Cursor res = CrimeListLocation.secondfavwordstartingwithf.getFavCrimes();
-
-                while(res.moveToNext())
-                {
-                    list2.add(res.getString(2));
-                }
-
-                SAVED=list2;
-
-            }
         }
-    }
 
-    /*
-    public void bookmarked(String Latjahapar)
-    {
-        set.add(Latjahapar);
-        SharedPreferences sharedPreferences = context.getSharedPreferences("BOOKMARKED",Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putStringSet("LatSaved",set);
-        editor.apply();
     }
-*/
     public interface OnCrimeListInterface{
         void onCrimeListClick(String heywassap);
-    }
-
-    public interface OnFavouriteInterface{
-        void onFavouriteAdded(String MyPers,String MyCateg,String MyLAT,String MyLong, int flagpoint);
     }
 
     public void searchImplement(List<String> ab, List<String> cd, List<String> ef, List<String> gh)
@@ -238,5 +210,6 @@ public class CrimeLocationAdapter extends RecyclerView.Adapter<CrimeLocationAdap
 
         notifyDataSetChanged();
     }
+
 
 }

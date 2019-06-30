@@ -74,7 +74,13 @@ public class FavDatabase extends SQLiteOpenHelper {
     {
         SQLiteDatabase db = this.getWritableDatabase();
         Toast.makeText(c,"Removed from favourites",Toast.LENGTH_SHORT).show();
-        db.delete(TABLE_NAME,"LATITUDE = ?",new String[] {LAT});
+        long result = db.delete(TABLE_NAME,"LATITUDE = ?",new String[] {LAT});
+
+        if(result>0)
+            Toast.makeText(c,"Deleted from favourites",Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(c,"Not found in favourites",Toast.LENGTH_SHORT).show();
+
     }
 
 }

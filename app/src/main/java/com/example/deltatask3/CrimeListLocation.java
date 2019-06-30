@@ -5,11 +5,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -33,7 +36,7 @@ import static com.example.deltatask3.LocationSearch.longitude;
 import static com.example.deltatask3.LocationSearch.monthisbest;
 import static com.example.deltatask3.LocationSearch.yearisbest;
 
-public class CrimeListLocation extends AppCompatActivity implements CrimeLocationAdapter.OnCrimeListInterface, CrimeLocationAdapter.OnFavouriteInterface{
+public class CrimeListLocation extends AppCompatActivity implements CrimeLocationAdapter.OnCrimeListInterface{
 
     TextView textlong,textlat,DATE;
     float longitudee,latitudee;
@@ -156,9 +159,6 @@ public class CrimeListLocation extends AppCompatActivity implements CrimeLocatio
         }, 4000);
 
 
-      /*  SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("BOOKMARKED", Context.MODE_PRIVATE);
-        LatSaved = sharedPreferences.getStringSet("LatSaved",temp);
-*/
         List<String> list = new ArrayList<String>();
 
         Cursor res = CrimeListLocation.secondfavwordstartingwithf.getFavCrimes();
@@ -179,7 +179,7 @@ public class CrimeListLocation extends AppCompatActivity implements CrimeLocatio
         mLayoutManager = new LinearLayoutManager(this);
 
         CRIMELIST.setLayoutManager(mLayoutManager);
-        cr7 = new CrimeLocationAdapter(getApplicationContext(),this,this,PERSIS,CATEG,LAT,LONG,STARC, list);
+        cr7 = new CrimeLocationAdapter(getApplicationContext(),this,PERSIS,CATEG,LAT,LONG,STARC, list);
         CRIMELIST.setAdapter(cr7);
     }
 
@@ -203,14 +203,4 @@ public class CrimeListLocation extends AppCompatActivity implements CrimeLocatio
         startActivity(intint);
     }
 
-    @Override
-    public void onFavouriteAdded(String MyPers, String MyCateg, String MyLAT, String MyLong, int flagpoint) {
-        System.out.println("FLAGPOINT IS "+flagpoint);
-        System.out.println("Clicked to add to fav. YAY");
-        if(flagpoint==50)
-            secondfavwordstartingwithf.InsertData(MyPers,MyCateg,MyLAT,MyLong);
-        else if(flagpoint==100)
-            secondfavwordstartingwithf.DeleteByLat(MyLAT);
-    }
-    
 }
